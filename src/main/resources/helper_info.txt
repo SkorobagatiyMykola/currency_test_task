@@ -1,0 +1,9 @@
+1. API для розробників
+https://bank.gov.ua/ua/open-data/api-dev
+
+
+2. Курс на дату, дата задається у форматі: yyyymmdd, де yyyy - рік, mm - місяць, dd - день
+https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=20200302&json
+
+3. Курс на поточну дату
+https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json
