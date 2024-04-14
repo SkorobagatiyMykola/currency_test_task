@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -15,13 +14,13 @@ import ua.skorobahatyi.currency_app.entity.Currency;
 import ua.skorobahatyi.currency_app.entity.dto.CurrencyDto;
 import ua.skorobahatyi.currency_app.entity.dto.CurrencyResponseDto;
 import ua.skorobahatyi.currency_app.entity.dto.DeleteMessage;
-import ua.skorobahatyi.currency_app.exception.GenericSystemException;
-import ua.skorobahatyi.currency_app.exception.IncorrectDateRatesException;
-import ua.skorobahatyi.currency_app.exception.InternetConnectionError;
+import ua.skorobahatyi.currency_app.exception.*;
 import ua.skorobahatyi.currency_app.repository.CurrencyRepository;
 
 import java.time.*;
 import java.time.chrono.ChronoLocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Set;
@@ -37,30 +36,41 @@ public class CurrencyService {
     private final RestTemplate restTemplate;
     private final CurrencyRepository currencyRepository;
     private static Set<String> dates = new ConcurrentSkipListSet<>();
+    private static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     private static ChronoLocalDate oldDate = LocalDate.of(1996, 01, 06);
 
-    public CurrencyResponseDto findCurrencyRatesByDate(LocalDate date) throws GenericSystemException {
+    public CurrencyResponseDto findCurrencyRatesByDate(String dateStr) throws GenericSystemException {
+        LocalDate date = checkAndGetCorrectDate(dateStr);
 
-        if (date.isBefore(oldDate) || date.isAfter(LocalDate.now())) {
-            String message = String.format("Check your date-params, to get a correct answer, the date must be between %s and %s", oldDate, LocalDate.now());
-            throw new IncorrectDateRatesException(HttpStatus.BAD_REQUEST, message);
-        }
-
-        String key = date.toString();
         List<Currency> currencies = null;
-        if (dates.contains(key)) {
+        if (dates.contains(dateStr)) {
             currencies = currencyRepository.findAllByDateId(date);
             logger.info("===== Get data from DataBase =====");
         } else {
             currencies = getCurrencyRatesFromNBU(date);
             currencyRepository.saveAll(currencies);
-            dates.add(key);
+            dates.add(dateStr);
         }
 
         var response = convertCorrectResponse(date, currencies);
 
         return response;
+    }
+
+    private static LocalDate checkAndGetCorrectDate(String dateStr) throws GenericSystemException {
+        LocalDate date;
+        try {
+            date = LocalDate.parse(dateStr, FORMATTER);
+        } catch (DateTimeParseException ex) {
+            throw DateFormatException.getException();
+        }
+
+        if (date.isBefore(oldDate) || date.isAfter(LocalDate.now())) {
+            throw IncorrectDateException.getException();
+        }
+
+        return date;
     }
 
     private List<Currency> getCurrencyRatesFromNBU(LocalDate date) throws GenericSystemException {
@@ -73,8 +83,7 @@ public class CurrencyService {
         try {
             jsonResponse = restTemplate.getForObject(url, JsonNode.class);
         } catch (RestClientException ex) {
-            String message = String.format("Check your Internet connection, the link %s is not available", url);
-            throw new InternetConnectionError(HttpStatus.INTERNAL_SERVER_ERROR, message);
+            throw InternetConnectionError.getException(url);
         }
 
         var currencies = StreamSupport.stream(jsonResponse.spliterator(), true)
@@ -91,6 +100,30 @@ public class CurrencyService {
         return currencies;
     }
 
+    @PostConstruct
+    private void postConstruct() {
+        logger.info("===== Initialization for set dates =====");
+        List<String> list = currencyRepository.findDistinctDates();
+        dates.addAll(list);
+        logger.info("==== DataBase has {} dates ====", list.size());
+    }
+
+
+    public DeleteMessage deleteCurrencyRatesByDate(String dateStr) throws GenericSystemException {
+        LocalDate date = checkAndGetCorrectDate(dateStr);
+
+        var currencies = currencyRepository.findAllByDateId(date);
+
+        if (currencies.isEmpty()) {
+            return new DeleteMessage(date, "There are no records in the database");
+        } else {
+            int size = currencies.size();
+            currencyRepository.deleteAll(currencies);
+            dates.remove(dateStr);
+            return new DeleteMessage(date, size + " records have been deleted from the DB");
+        }
+    }
+
     private CurrencyResponseDto convertCorrectResponse(LocalDate date, List<Currency> currencies) {
         ZoneId timeZoneId = ZoneId.of("Europe/Kiev");
         var list = currencies.stream()
@@ -102,27 +135,5 @@ public class CurrencyService {
         var response = new CurrencyResponseDto(date, list);
 
         return response;
-    }
-
-    @PostConstruct
-    private void postConstruct() {
-        logger.info("===== Initialization for set dates =====");
-        List<String> list = currencyRepository.findDistinctDates();
-        dates.addAll(list);
-        logger.info("==== DataBase has {} dates ====", list.size());
-    }
-
-
-    public DeleteMessage deleteCurrencyRatesByDate(LocalDate dateId) {
-        var currencies = currencyRepository.findAllByDateId(dateId);
-
-        if (currencies.isEmpty()) {
-            return new DeleteMessage(dateId, "There are no records in the database");
-        } else {
-            int size = currencies.size();
-            currencyRepository.deleteAll(currencies);
-            dates.remove(dateId.toString());
-            return new DeleteMessage(dateId, size + " records have been deleted from the DB");
-        }
     }
 }
