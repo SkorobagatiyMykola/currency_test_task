@@ -7,3 +7,5 @@ https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?date=20200302&json
 
 3. Курс на поточну дату
 https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json
+4. Correct launcher mock-app:
+java -Dfile.encoding=UTF-8 -jar currency_app-0.0.1-SNAPSHOT.jar --spring.profiles.active=mock
