@@ -6,6 +6,6 @@ CREATE TABLE currencies(
     code VARCHAR(3) NOT NULL,
     name VARCHAR(100) NOT NULL,
     rate decimal(20,8),
-    created_at timestamptz,
+    created_at timestamp ,
     PRIMARY KEY(date_id, currency_id)
 );
