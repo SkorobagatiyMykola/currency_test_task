@@ -5,11 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ua.skorobahatyi.currency_app.entity.Currency;
 import ua.skorobahatyi.currency_app.entity.dto.CurrencyDto;
 import ua.skorobahatyi.currency_app.entity.dto.CurrencyResponseDto;
 import ua.skorobahatyi.currency_app.entity.dto.DeleteMessage;
+import ua.skorobahatyi.currency_app.exception.CurrencyRatesNotFoundException;
 import ua.skorobahatyi.currency_app.exception.DateFormatException;
 import ua.skorobahatyi.currency_app.exception.GenericSystemException;
 import ua.skorobahatyi.currency_app.exception.IncorrectDateException;
@@ -22,6 +24,7 @@ import java.time.ZoneId;
 import java.time.chrono.ChronoLocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -37,11 +40,13 @@ public class CurrencyServiceMockImpl implements CurrencyService {
 
     @Override
     public CurrencyResponseDto findCurrencyRatesByDate(String dateStr) throws GenericSystemException {
-        logger.info("============ :" + dateStr);
-
         LocalDate date = checkAndGetCorrectDate(dateStr);
-        var currencies = currencyRepository.findAll();
-        //var currencies = currencyRepository.findAllByDateId(date);
+        var currencies = currencyRepository.findAllByDateId(date);
+        if (currencies.isEmpty()) {
+            String message = "Cannot find currency rates on date: " + dateStr;
+            throw new CurrencyRatesNotFoundException(HttpStatus.NOT_FOUND, message);
+        }
+
         logger.info("===== Get data from DataBase =====");
         var response = convertCorrectResponse(date, currencies);
 
@@ -50,7 +55,17 @@ public class CurrencyServiceMockImpl implements CurrencyService {
 
     @Override
     public DeleteMessage deleteCurrencyRatesByDate(String dateStr) throws GenericSystemException {
-        return null;
+        LocalDate date = checkAndGetCorrectDate(dateStr);
+
+        var currencies = currencyRepository.findAllByDateId(date);
+
+        if (currencies.isEmpty()) {
+            return new DeleteMessage(date, "There are no records in the database");
+        } else {
+            int size = currencies.size();
+            currencyRepository.deleteAll(currencies);
+            return new DeleteMessage(date, size + " records have been deleted from the DB");
+        }
     }
 
     @PostConstruct
@@ -65,7 +80,7 @@ public class CurrencyServiceMockImpl implements CurrencyService {
         var list = currencies.stream()
                 .map(el -> new CurrencyDto(el.getCode(),
                         el.getName(),
-                        OffsetDateTime.ofInstant(el.getCreatedAt(), timeZoneId),
+                        OffsetDateTime.ofInstant(el.getCreatedAt(), timeZoneId).truncatedTo(ChronoUnit.MILLIS),
                         el.getRate().stripTrailingZeros()))
                 .toList();
         var response = new CurrencyResponseDto(date, list);
