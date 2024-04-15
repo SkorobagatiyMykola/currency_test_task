@@ -25,6 +25,5 @@ public class Currency {
 
     private BigDecimal rate;
 
-    @Column(columnDefinition = "timestamp default current_timestamp")
     private Instant createdAt;
 }
