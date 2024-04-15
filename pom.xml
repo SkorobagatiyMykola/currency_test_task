@@ -15,7 +15,6 @@
     <description>Demo project for Currency App</description>
     <properties>
         <java.version>17</java.version>
-        <spring-boot.run.jvmArguments>-Dfile.encoding=UTF-8</spring-boot.run.jvmArguments>
     </properties>
     <dependencies>
         <dependency>
@@ -31,10 +30,10 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-      <!--  <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>-->
+        <!--  <dependency>
+              <groupId>org.flywaydb</groupId>
+              <artifactId>flyway-core</artifactId>
+          </dependency>-->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -82,13 +81,6 @@
                         </exclude>
                     </excludes>
 
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <argLine>-Dfile.encoding=UTF-8</argLine>
                 </configuration>
             </plugin>
         </plugins>
