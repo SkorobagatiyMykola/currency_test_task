@@ -10,7 +10,6 @@ import ua.skorobahatyi.currency_app.entity.dto.CurrencyResponseDto;
 import ua.skorobahatyi.currency_app.entity.dto.DeleteMessage;
 import ua.skorobahatyi.currency_app.exception.GenericSystemException;
 import ua.skorobahatyi.currency_app.service.CurrencyService;
-import ua.skorobahatyi.currency_app.service.impl.CurrencyServiceProdImpl;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +26,7 @@ public class CurrencyController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         String dateNow = formatter.format(LocalDate.now());
         logger.debug("=== GET currency rates on the actual date: {}", dateNow);
+
         CurrencyResponseDto response = currencyService.findCurrencyRatesByDate(dateNow);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -34,7 +34,6 @@ public class CurrencyController {
 
     @GetMapping("/{dateId}")
     public ResponseEntity<CurrencyResponseDto> getCurrencyRatesOnDate(@PathVariable("dateId") String dateStr) throws GenericSystemException {
-      //  LocalDate dateReport = checkAndGetCorrectDate(dateId);
         logger.debug("=== GET currency rates on the date: {}", dateStr);
 
         CurrencyResponseDto response = currencyService.findCurrencyRatesByDate(dateStr);
@@ -45,6 +44,7 @@ public class CurrencyController {
     @DeleteMapping("/{dateId}")
     public ResponseEntity<DeleteMessage> deleteRateCurrencyOnDate(@PathVariable("dateId") String dateStr) throws GenericSystemException {
         logger.debug("=== GET currency rates on the date: {}", dateStr);
+
         DeleteMessage response = currencyService.deleteCurrencyRatesByDate(dateStr);
 
         return new ResponseEntity<>(response, HttpStatus.OK);

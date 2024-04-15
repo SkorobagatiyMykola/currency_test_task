@@ -70,9 +70,7 @@ public class CurrencyServiceMockImpl implements CurrencyService {
 
     @PostConstruct
     private void postConstruct() {
-        logger.info("I am mock");
-
-        logger.info("============================");
+        logger.info("====== I am mock service, CurrencyServiceMockImpl =====");
     }
 
     private CurrencyResponseDto convertCorrectResponse(LocalDate date, List<Currency> currencies) {

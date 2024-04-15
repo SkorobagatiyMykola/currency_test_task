@@ -1,4 +1,5 @@
 INSERT INTO currencies (date_id, currency_id, code, name, rate,created_at) VALUES (now(), 1111,'BTC','Біткоїн, криптовалюта',1000000.12345,now());
+INSERT INTO currencies (date_id, currency_id, code, name, rate,created_at) VALUES (now(), 1112,'ETH','Ether, cryptocurrency',1000000.12345,now());
 INSERT INTO currencies (date_id, currency_id, code, name, rate,created_at) VALUES (now(), 840,'USD','Долар США', 39.12345, now());
 INSERT INTO currencies (date_id, currency_id, code, name, rate,created_at) VALUES (now(), 978,'EUR','Євро', 40.12345, now());
 
