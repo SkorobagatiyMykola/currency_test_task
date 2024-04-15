@@ -16,7 +16,7 @@ import ua.skorobahatyi.currency_app.exception.DateFormatException;
 import ua.skorobahatyi.currency_app.exception.GenericSystemException;
 import ua.skorobahatyi.currency_app.exception.IncorrectDateException;
 import ua.skorobahatyi.currency_app.exception.InternetConnectionError;
-import ua.skorobahatyi.currency_app.service.CurrencyService;
+import ua.skorobahatyi.currency_app.service.impl.CurrencyServiceProdImpl;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -32,7 +32,7 @@ class CurrencyControllerTest {
     @InjectMocks
     CurrencyController currencyController;
     @Mock
-    CurrencyService currencyService;
+    CurrencyServiceProdImpl currencyService;
 
     private static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private static String nbuCurrencyUrl = "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json";
