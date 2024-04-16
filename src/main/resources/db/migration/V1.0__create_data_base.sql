@@ -1,6 +1,6 @@
-drop table if exists currencies;
+--drop table if exists currencies;
 
-CREATE TABLE currencies(
+CREATE TABLE IF NOT EXISTS currencies(
     date_id date,
     currency_id int,
     code VARCHAR(3) NOT NULL,
