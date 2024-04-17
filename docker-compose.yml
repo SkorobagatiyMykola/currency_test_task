@@ -20,6 +20,8 @@ services:
     image: postgres
     ports:
       - "5432:5432"
+    volumes:
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/0_init.sql
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
