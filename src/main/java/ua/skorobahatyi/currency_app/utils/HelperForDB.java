@@ -5,6 +5,7 @@ import org.springframework.web.client.RestTemplate;
 import ua.skorobahatyi.currency_app.entity.Currency;
 
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -20,6 +21,7 @@ public class HelperForDB {
 //        List<Currency> currencies1= getCurrencyFromNBU(LocalDate.now());
 //        List<Currency> currencies2= getCurrencyFromNBU(LocalDate.of(2024,02,02));
 //        System.out.println(currencies1.toString());
+
 
 
         System.out.println("=================== THE END =======================");
